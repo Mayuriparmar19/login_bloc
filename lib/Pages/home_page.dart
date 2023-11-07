@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/Bloc/sign_in_bloc.dart';
 import 'package:login_bloc/Constants/colors_page.dart';
 import 'package:login_bloc/Pages/email_bloc.dart';
 
@@ -20,6 +22,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+      ),
       body: Form(
         child: SingleChildScrollView(
           child: Column(
@@ -65,7 +70,9 @@ class _HomeState extends State<Home> {
                         backgroundColor: AppColors.firstColor),
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const LoginPage()));
+                          builder: (context) => BlocProvider(
+                              create: (context) => SignInBloc(),
+                              child: const LoginPage())));
                     },
                     child:  Text('Sign in With Email',
                         style: TextStyle(color:AppColors.secondColor,fontSize: 18))),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/Bloc/sign_in_bloc.dart';
+import 'package:login_bloc/Bloc/sign_in_event.dart';
+import 'package:login_bloc/Bloc/sign_in_state.dart';
 import 'package:login_bloc/Constants/colors_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        bottomOpacity: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(
@@ -45,14 +50,25 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 height: size.height * 0.01,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Errors will show up here',
-                      style: TextStyle(color: Colors.red, fontSize: 16),
-                    )),
+              BlocBuilder<SignInBloc,SignInState>(
+                builder: (context,state){
+
+                  if(state is SignInErrorState){
+                   return  Padding(
+                      padding:const  EdgeInsets.symmetric(horizontal: 25),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            state.errorMsg,
+                            style:const TextStyle(color: Colors.red, fontSize: 16),
+                          )),
+                    );
+                  }
+                  else{
+                     return Container();
+                  }
+
+                }
               ),
               SizedBox(
                 height: size.height * 0.02,
@@ -60,6 +76,9 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextFormField(
+                  onChanged:(val){
+                    BlocProvider.of<SignInBloc>(context).add(SignInTextChangedEvent(email.text, pass.text));
+                  },
                   showCursor: false,
                   controller: email,
                   decoration: InputDecoration(
@@ -95,6 +114,9 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextFormField(
+                  onChanged:(val){
+                    BlocProvider.of<SignInBloc>(context).add(SignInTextChangedEvent(email.text, pass.text));
+                  },
                   showCursor: false,
                   controller: pass,
                   decoration: InputDecoration(
@@ -127,19 +149,33 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 height: size.height * 0.04,
               ),
-              SizedBox(
-                height: size.height * 0.07,
-                width: size.width * 0.70,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.firstColor),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const LoginPage()));
-                    },
-                    child: Text('Sign In',
-                        style: TextStyle(
-                            color: AppColors.secondColor, fontSize: 18))),
+              BlocBuilder<SignInBloc,SignInState>(
+                builder: (context,state) {
+                  if (state is SignInLoadingState){
+                     return Center(child: CircularProgressIndicator(color: AppColors.secondColor,));
+                  }
+                  return SizedBox(
+                    height: size.height * 0.07,
+                    width: size.width * 0.70,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: (state is SignInValidState)? AppColors.firstColor: AppColors.greyColor),
+                        onPressed: () {
+                           if(state is SignInValidState){
+                             BlocProvider.of<SignInBloc>(context).add(SignInSubmittedEvent(email.text, pass.text));
+                           }
+                            email.clear();
+                            pass.clear();
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //     builder: (context) => const LoginPage()));
+                        },
+                        child: Text('Sign In',
+                            style: TextStyle(
+                              fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color:  (state is SignInValidState)? AppColors.secondColor: AppColors.whiteColor)))
+                  );
+                },
               ),
               SizedBox(
                 height: size.height * 0.03,

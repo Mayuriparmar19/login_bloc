@@ -8,7 +8,7 @@ class SignInBloc extends Bloc <SignInEvent,SignInState>{
        SignInBloc():super(SignInInitialState()){
             
          on<SignInTextChangedEvent>((event, emit) {
-           if(event.emailValue == "" && EmailValidator.validate(event.emailValue) == false){
+           if( EmailValidator.validate(event.emailValue) == false){
              emit(SignInErrorState('Enter Your Email First!'));
 
            }
